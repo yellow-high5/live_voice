@@ -1,0 +1,41 @@
+version: '3'
+services:
+
+  front:
+    build: ./front/.
+    container_name: live_voice_front
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+    networks:
+      - live_net
+    volumes:
+      - ./front/.:/home/app/front
+      - /home/app/front/node_modules
+
+  api:
+    build: ./api/.
+    container_name: live_voice_api
+    environment:
+      NODE_ENV: development
+    ports:
+      - 8080:8080
+      - 9000:9000
+    networks:
+      - live_net
+    volumes:
+      - ./api/.:/home/app/api
+      - /home/app/api/node_modules
+
+  db:
+    image: mongo:4.0
+    container_name: live_voice_db
+    ports:
+      - 27017:27017
+    networks:
+      - live_net
+
+networks:
+  live_net:
+    driver: bridge
