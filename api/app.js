@@ -130,6 +130,18 @@ function startLive(live){
       });
     });
 
+    //クライアントからのシグナリングを受信したとき
+    socket.on('signaling', function (data) {
+      data.from = socket.id;
+      let target = data.to
+      console.log(data)
+      if (target) {
+        nsp.to(target).emit('signaling', data);
+        return;
+      }
+      nsp.emit('signaling', data);
+    });
+
     //ライブへの接続が切れたクライアントがいたとき
     socket.on('disconnect', (reason) => {
       Member.findOne({socket: socket.id}).then((member) => {
@@ -162,16 +174,6 @@ function startLive(live){
 
 }
 
-
-//socketIDの配列を渡すとメンバーの名前配列を返す
-/*
-function getMembers(socketIds, performerId){
-  let members = [];
-  socketIds.map((socketid) => {
-
-  });
-}
-*/
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

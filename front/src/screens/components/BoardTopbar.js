@@ -40,9 +40,13 @@ export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, c
                 <img src={logo} alt="logo" className={classes.logo} />
               </ButtonBase>
             </Tooltip> :
-            <ButtonBase disabled>
-              <img src={logo} alt="logo" className={classes.logo} />
-            </ButtonBase>
+            <Tooltip title="Live Settings" placement="bottom">
+              <ButtonBase onClick={() => {
+                clickLogo();
+              }}>
+                <img src={logo} alt="logo" className={classes.logo} />
+              </ButtonBase>
+            </Tooltip>
           }
           <ClickAwayListener onClickAway={clickAway}>
             <div className={classes.title}>
@@ -62,7 +66,7 @@ export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, c
             </div>
           </ClickAwayListener>
           <div className={classes.channel}>
-            <Tooltip title="Copy Channel😆" placement="bottom">
+            <Tooltip title="Copy Channel!" placement="bottom">
               <IconButton variant="contained" onClick={() => copy(channel)}>
                 <LiveTv className={classes.topbar_icon} />
               </IconButton>
@@ -76,3 +80,8 @@ export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, c
     </MuiThemeProvider>
   );
 };
+
+
+// <ButtonBase disabled>
+//   <img src={logo} alt="logo" className={classes.logo} />
+// </ButtonBase>

@@ -61,6 +61,32 @@ const message = (state = "", action) => {
   }
 };
 
+const fetchingPerformer = (state = false, action) => {
+  switch (action.type) {
+    case "FETCH_LIVE":
+      return true;
+    case "SUCCESS_FETCH":
+      return false;
+    case "ERROR_FETCH":
+      return false;
+    default:
+      return state;
+  }
+};
+
+const fetchingListener = (state = false, action) => {
+  switch (action.type) {
+    case "FETCH_CHANNEL":
+      return true;
+    case "SUCCESS_FETCH":
+      return false;
+    case "ERROR_FETCH":
+      return false;
+    default:
+      return state;
+  }
+};
+
 const isPerformer = (state = false, action) => {
   switch (action.type) {
     case "START_LIVE":
@@ -71,19 +97,6 @@ const isPerformer = (state = false, action) => {
       return state;
   }
 }
-
-const myvoice = (state = "", action) => {
-  switch (action.type) {
-    case "INPUT_VOICE":
-      return action.text;
-    case "EMIT_VOICE":
-      return "";
-    case "EXIT_LIVE":
-      return "";
-    default:
-      return state;
-  }
-};
 
 const voices = (state = [], action) => {
   switch (action.type) {
@@ -106,6 +119,19 @@ const members = (state = [], action) => {
   switch (action.type) {
     case "RECEIVE_LIVE_INFO":
       return action.data
+    default:
+      return state;
+  }
+};
+
+const myvoice = (state = "", action) => {
+  switch (action.type) {
+    case "INPUT_VOICE":
+      return action.text;
+    case "EMIT_VOICE":
+      return "";
+    case "EXIT_LIVE":
+      return "";
     default:
       return state;
   }
@@ -134,43 +160,28 @@ const isOpenMemberList = (state = false, action) => {
   }
 }
 
-const fetchingPerformer = (state = false, action) => {
-  switch (action.type) {
-    case "FETCH_LIVE":
-      return true;
-    case "SUCCESS_FETCH":
-      return false;
-    case "ERROR_FETCH":
-      return false;
-    default:
-      return state;
-  }
+/*
+const onCamera = (state = false, action) => {
+
 };
 
-const fetchingListener = (state = false, action) => {
-  switch (action.type) {
-    case "FETCH_CHANNEL":
-      return true;
-    case "SUCCESS_FETCH":
-      return false;
-    case "ERROR_FETCH":
-      return false;
-    default:
-      return state;
-  }
+const onScreen = (state = false, action) => {
+
 };
+
+*/
 
 export default combineReducers({
   title,
   channel,
   name,
   message,
-  isPerformer,
-  myvoice,
-  voices,
-  members,
-  isOpenController,
-  isOpenMemberList,
   fetchingPerformer,
   fetchingListener,
+  isPerformer,
+  voices,
+  members,
+  myvoice,
+  isOpenController,
+  isOpenMemberList,
 });

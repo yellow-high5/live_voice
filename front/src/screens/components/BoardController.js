@@ -49,7 +49,7 @@ export const BoardController = ({ classes, open, closeController }) => {
         <List className={classes.board_control_menu}>
           <ListItem button onClick={() => {
             closeController();
-            startSelfy(closeController)
+            startSelfy()
           }}>
             <ListItemIcon>
               <CameraIcon />
@@ -58,7 +58,7 @@ export const BoardController = ({ classes, open, closeController }) => {
           </ListItem>
           <ListItem button onClick={() => {
             closeController();
-            shareScreen(closeController)
+            shareScreen()
           }}>
             <ListItemIcon>
               <CastConnectedIcon />
@@ -67,7 +67,7 @@ export const BoardController = ({ classes, open, closeController }) => {
           </ListItem>
           <ListItem button onClick={() => {
             closeController();
-            openSettings(closeController)
+            openSettings()
           }}>
             <ListItemIcon>
               <SettingsIcon />
@@ -86,7 +86,7 @@ const startSelfy = () => {
 
   let video = document.getElementById('video');
   //let localStream = null;
-  navigator.getUserMedia({video: true, audio: true},
+  navigator.getUserMedia({video: { width: 1280, height: 720 }, audio: true},
     function(stream) {
       console.log(stream);
       video.srcObject = stream;
@@ -102,8 +102,7 @@ const shareScreen = () => {
   window.URL = window.URL || window.webkitURL;
 
   let video = document.getElementById('video');
-  //let localStream = null;
-  navigator.mediaDevices.getUserMedia({video: {mediaSource: "screen"}},
+  navigator.getUserMedia({video: {mediaSource: "screen"} },
     function(stream) {
       console.log(stream);
       video.srcObject = stream;
