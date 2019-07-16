@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-labelledby="title"
+aria-describedby="desc" role="img" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>Unavailable</title>
+  <desc>A color styled icon from Orion Icon Library.</desc>
+  <path data-name="layer2"
+  d="M32 9.059a22.817 22.817 0 0 1 13.524 4.425l-32.04 32.04A22.925 22.925 0 0 1 32 9.06zm0 45.883a22.815 22.815 0 0 1-13.523-4.426l32.039-32.04A22.926 22.926 0 0 1 32 54.942z"
+  fill="#ffffff"></path>
+  <path d="M50.516 18.476l-4 4a22.873 22.873 0 0 1-.429 27.611 22.892 22.892 0 0 0 4.429-31.611zM28 13.059a22.817 22.817 0 0 1 13.524 4.425l4-4a22.89 22.89 0 0 0-31.61 4.43A22.816 22.816 0 0 1 28 13.058z"
+  fill="#000028" opacity=".15"></path>
+  <path data-name="layer1" d="M32 2a30 30 0 1 0 30 30A30.034 30.034 0 0 0 32 2zm0 7.059a22.817 22.817 0 0 1 13.524 4.425l-32.04 32.04A22.925 22.925 0 0 1 32 9.06zm0 45.883a22.815 22.815 0 0 1-13.523-4.426l32.039-32.04A22.926 22.926 0 0 1 32 54.942z"
+  fill="#f50e0e"></path>
+  <path data-name="stroke" d="M32 2a30 30 0 1 0 30 30A30.034 30.034 0 0 0 32 2zm0 7.059a22.817 22.817 0 0 1 13.524 4.425l-32.04 32.04A22.925 22.925 0 0 1 32 9.06zm0 45.883a22.815 22.815 0 0 1-13.523-4.426l32.039-32.04A22.926 22.926 0 0 1 32 54.942z"
+  fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"
+  stroke-width="2"></path>
+</svg>

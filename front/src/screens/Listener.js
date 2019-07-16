@@ -51,11 +51,11 @@ const inner_theme = createMuiTheme({
     MuiButtonBase: {
       root: {
         background: "linear-gradient(45deg, #FCEE21 0%, #FBB03B 100%)",
+        '&$disabled': {
+          background: "rgba(255,255,255,0.8)!important",
+          border: "3px solid #FFFFFF!important",
+        },
       },
-      disabled: {
-        background: "rgba(255,255,255,0.8)",
-        border: "3px solid #FFFFFF",
-      }
     }
   }
 });

@@ -5,6 +5,7 @@ import Home from "./screens/Home";
 import Performer from "./screens/Performer";
 import Listener from "./screens/Listener";
 import Board from "./screens/Board";
+import NoMatch from "./screens/NoMatch";
 
 const theme = createMuiTheme({
   palette: {
@@ -24,7 +25,8 @@ class App extends Component {
               <Route exact path="/" component={Home} />
               <Route path="/performer" component={Performer} />
               <Route path="/listener" component={Listener} />
-              <Route path="/board" component={Board} />
+              <Route path="/board/:channel" component={Board} />
+              <Route component={NoMatch} />
             </div>
           </BrowserRouter>
         </div>

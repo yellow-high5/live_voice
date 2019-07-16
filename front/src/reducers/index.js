@@ -105,9 +105,14 @@ const voices = (state = [], action) => {
     case "RECEIVE_VOICE":
       let new_state = state;
       if (action.voice.content !== "") {
-        new_state = state.concat(action.voice);
+        new_state = [action.voice].concat(state);
       }
       return new_state;
+      // let new_state = state;
+      // if (action.voice.content !== "") {
+      //   new_state.splice(0, 0, action.voice);
+      // }
+      // return new_state;
     case "EXIT_LIVE":
       return [];
     default:
@@ -137,6 +142,17 @@ const myvoice = (state = "", action) => {
   }
 };
 
+const isOpenMemberList = (state = false, action) => {
+  switch (action.type) {
+    case "CLICK_MEMBER_LIST":
+      return !state;
+    case "CLICK_AWAY_MEMBER_LIST":
+      return false;
+    default:
+      return state;
+  }
+}
+
 const isOpenController = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE_CONTROLLER":
@@ -149,27 +165,90 @@ const isOpenController = (state = false, action) => {
   }
 }
 
-const isOpenMemberList = (state = false, action) => {
+const onSelfy = (state = false, action) => {
   switch (action.type) {
-    case "CLICK_MEMBER_LIST":
-      return !state;
-    case "CLICK_AWAY_MEMBER_LIST":
+    case "TOGGLE_SETTINGS":
+      if(action.setting === 'selfy'){
+        return !state;
+      }
+      else if(action.setting === 'screen'){
+        return false;
+      }
+      return state
+    case "EXIT_LIVE":
       return false;
     default:
       return state;
   }
 }
 
-/*
-const onCamera = (state = false, action) => {
-
-};
-
 const onScreen = (state = false, action) => {
+  switch (action.type) {
+    case "TOGGLE_SETTINGS":
+      if(action.setting === 'screen'){
+        return !state;
+      }
+      else if(action.setting === 'selfy'){
+        return false;
+      }
+      return state;
+    case "EXIT_LIVE":
+      return false;
+    default:
+      return state;
+  }
+}
 
-};
+const onSpeaker = (state = false, action) => {
+  switch (action.type) {
+    case "TOGGLE_SETTINGS":
+      if(action.setting === 'speaker'){
+        return !state;
+      }
+      return state;
+    case "EXIT_LIVE":
+      return false;
+    default:
+      return state;
+  }
+}
 
-*/
+const onVoice = (state = true, action) => {
+  switch (action.type) {
+    case "TOGGLE_SETTINGS":
+      if(action.setting === 'voice'){
+        return !state;
+      }
+      return state;
+    case "EXIT_LIVE":
+      return true;
+    default:
+      return state;
+  }
+}
+
+const videoVolume = (state = 0.5, action) => {
+  switch(action.type) {
+    case "CHANGE_VOLUME":
+      return action.volume;
+    case "EXIT_LIVE":
+      return 0.5;
+    default:
+      return state;
+  }
+}
+
+const videoZoom = (state = 1.0, action) => {
+  switch(action.type) {
+    case "CHANGE_ZOOM":
+      return action.scale;
+    case "EXIT_LIVE":
+      return 1.0;
+    default:
+      return state;
+  }
+}
+
 
 export default combineReducers({
   title,
@@ -182,6 +261,12 @@ export default combineReducers({
   voices,
   members,
   myvoice,
-  isOpenController,
   isOpenMemberList,
+  isOpenController,
+  onSelfy,
+  onScreen,
+  onSpeaker,
+  onVoice,
+  videoVolume,
+  videoZoom,
 });

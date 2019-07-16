@@ -30,30 +30,30 @@ const inner_theme = createMuiTheme({
   }
 });
 
-export const BoardMemberList = ({classes, members}) => {
+export const MemberList = ({classes, members}) => {
   return(
     <MuiThemeProvider theme={inner_theme}>
-      <Paper className={classes.paper_list}>
+      <Paper className={classes.members_paper}>
         <List component="div">
           { members.map((member, index) => {
             let name = (member.name === "") ? "Anonymous🤡" : member.name
             //パフォーマー
             if(index === 0){
               return(
-                <ListItem className={classes.paper_list_item}>
+                <ListItem className={classes.members_paper_item}>
                   <Badge color="primary" variant="dot">
                     <AccountCircle className={classes.topbar_icon} />
                   </Badge>
-                  <Typography className={classes.paper_list_typo}>{name}</Typography>
+                  <Typography className={classes.members_paper_typo}>{name}</Typography>
                 </ListItem>
               )
             }
             return(
-              <ListItem className={classes.paper_list_item}>
+              <ListItem className={classes.members_paper_item}>
                 <Badge color="secondary" variant="dot">
                   <AccountCircle className={classes.topbar_icon} />
                 </Badge>
-                <Typography className={classes.paper_list_typo}>{name}</Typography>
+                <Typography className={classes.members_paper_typo}>{name}</Typography>
               </ListItem>
             )
           })}
@@ -62,14 +62,3 @@ export const BoardMemberList = ({classes, members}) => {
     </MuiThemeProvider>
   );
 };
-
-
-// {members.map((member) => (
-//         let anonymous = 0:
-//         if(member.name = ""){
-//           anonymous++;
-//         }
-//         else{
-//           <div className={classes.paper_list_item}>member.name</div>
-//         }
-//       ))}

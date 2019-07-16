@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import { receiveLiveInfo, inputVoice, receiveVoice, emitVoice, toggleController, clickMemberList, clickAwayMemberList, exitLive } from "../actions";
+import { receiveLiveInfo, inputVoice, receiveVoice, emitVoice, toggleController, toggleSettings, changeVolume, changeZoom, clickMemberList, clickAwayMemberList, exitLive } from "../actions";
 
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
@@ -9,7 +9,8 @@ import { withStyles } from "@material-ui/core/styles";
 import { BoardTopbar } from "./components/BoardTopbar";
 import { BoardController } from "./components/BoardController";
 import { BoardForm } from "./components/BoardForm";
-import BoardMessage from "./components/BoardMessage";
+import VoiceList from "./components/VoiceList";
+import VoiceChat from "./components/VoiceChat";
 
 import io from "socket.io-client";
 import Swal from 'sweetalert2';
@@ -54,7 +55,7 @@ const styles = theme => ({
   icon: {
     color: "#FFFFFF"
   },
-  paper_list: {
+  members_paper: {
     backgroundColor: "#282c34",
     position: "absolute",
     maxHeight: 180,
@@ -66,19 +67,37 @@ const styles = theme => ({
     overflow: "auto",
     zIndex: 999,
   },
-  paper_list_item: {
+  members_paper_item: {
     padding: 3,
   },
-  paper_list_typo: {
+  members_paper_typo: {
     marginLeft: 5,
   },
-  display: {
+  live_content: {
     position: "fixed",
+    top: 64,
     width: "100vw",
     height: "calc(100vh - 144px)",
   },
-  board_message: {
-    position: "relative"
+  display: {
+    position: "absolute",
+    width: "100vw",
+  },
+  voices_list_paper: {
+    backgroundColor: "rgba(16,17,20, 0.5)",
+    position: "absolute",
+    width: "25vw",
+    height: "calc(100vh - 144px)",
+    overflow: "auto",
+    direction: "rtl",
+  },
+  voices_chat_paper: {
+    backgroundColor: "rgba(16,17,20, 0.5)",
+    width: "100vw",
+    height: "calc(100vh - 144px)",
+    overflow: "auto",
+    direction: "rtl",
+    margin: "auto",
   },
   drawer: {
     backgroundColor: "#282c34",
@@ -92,9 +111,12 @@ const styles = theme => ({
     color: "#FFFFFF",
     boxShadow: "10px 5px 5px 0px rgba(0,0,0,0.14)"
   },
+  board_control_subheader: {
+    color: "#FFFFFF",
+    borderBottom: "1px solid #FFFFFF",
+  },
 });
 
-//ロゴ、バッジ(人数表示)、タイトル、チャンネルコード、投稿フォーム、ボタン(画像、リンク)、スタンプ
 class Board extends React.Component {
   constructor(props) {
     super(props);
@@ -129,6 +151,7 @@ class Board extends React.Component {
             }).then((result) => {
               if (result.value) {
                 this.connectVideo();
+                this.props.toggleSettings('selfy');
               }
             })
           }
@@ -150,20 +173,21 @@ class Board extends React.Component {
           this.addIceCandidate(from, candidate);
           break;
         case "end":
-        if(!this.props.isPerformer){
-          Swal.fire({
-            text: 'ビデオ配信が終了しました。',
-            type: 'alert',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes'
-          }).then((result) => {
-            if (result.value) {
-              this.detachVideo();
-            }
-          })
-        }
+          if(!this.props.isPerformer){
+            Swal.fire({
+              text: 'ビデオ配信が終了しました。',
+              type: 'alert',
+              confirmButtonText: 'Yes'
+            }).then((result) => {
+              if (result.value) {
+                this.detachVideo();
+                this.props.toggleSettings('selfy');
+              }
+            })
+          }
+          break;
         default:
-          return;
+          break;
       }
     });
     //チャンネルの終了を受信
@@ -179,6 +203,11 @@ class Board extends React.Component {
         }
       })
     });
+
+    //パフォーマーでないならビデオ接続スタート
+    if(!this.props.isPerformer){
+      this.connectVideo();
+    }
   }
 
   emitBroadcast(data) {
@@ -401,7 +430,7 @@ class Board extends React.Component {
     console.log('attached!');
     let video = document.getElementById('video');
     video.srcObject = stream;
-    video.volume = 1.0;
+    video.volume = 0.5;
   }
   detachVideo() {
     console.log('detached!');
@@ -422,7 +451,7 @@ class Board extends React.Component {
     navigator.getUserMedia = await navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
     switch(type) {
       case "selfy":
-        navigator.getUserMedia({video: { width: 1280, height: 720 }, audio: true},
+        navigator.getUserMedia({video: true, audio: true},
           (stream) => {
             this.localStream = stream;
             video.srcObject = stream;
@@ -433,7 +462,7 @@ class Board extends React.Component {
         );
         break;
       case "screen":
-        navigator.getUserMedia({video: {mediaSource: "screen"} },
+        navigator.getUserMedia({video: {mediaSource: "screen"}},
           (stream) => {
             this.localStream = stream;
             video.srcObject = stream;
@@ -442,6 +471,8 @@ class Board extends React.Component {
             console.log(err);
           }
         );
+        break;
+      default:
         break;
     }
   }
@@ -474,10 +505,6 @@ class Board extends React.Component {
     this.stopVideo();
   }
 
-
-
-
-
   componentWillUnmount() {
     // if(this.props.isPerformer){
     //   Swal.fire({
@@ -499,6 +526,9 @@ class Board extends React.Component {
     //     }
     //   })
     // }
+    if(this.props.onSelfy || this.props.onScreen){
+      this.hangupVideo()
+    }
     this.socket.close();
     this.props.exitLive();
     this.props.history.push('/');
@@ -514,11 +544,20 @@ class Board extends React.Component {
       members,
       myvoice,
       isPerformer,
-      isOpenController,
       isOpenMemberList,
+      isOpenController,
+      onSelfy,
+      onScreen,
+      onSpeaker,
+      onVoice,
+      videoVolume,
+      videoZoom,
       onChange,
       emitVoice,
       toggleController,
+      toggleSettings,
+      changeVolume,
+      changeZoom,
       clickMemberList,
       clickAwayMemberList,
     } = this.props;
@@ -529,7 +568,6 @@ class Board extends React.Component {
           classes={classes}
           title={title}
           channel={channel}
-          isPerformer={isPerformer}
           clickLogo={toggleController}
           clickMike={clickMemberList}
           clickAway={clickAwayMemberList}
@@ -538,23 +576,38 @@ class Board extends React.Component {
         />
         <BoardController
           classes={classes}
+          isPerformer={isPerformer}
           open={isOpenController}
           closeController={toggleController}
+          toggleSettings={toggleSettings}
+          onSelfy={onSelfy}
+          onScreen={onScreen}
+          onSpeaker={onSpeaker}
+          onVoice={onVoice}
+          startSelfy={() => this.startVideo("selfy").then(() => {this.emitBroadcast({type: 'cast'})})}
+          startScreen={() => this.startVideo("screen").then(() => {this.emitBroadcast({type: 'cast'})})}
+          stopVideo={() => this.hangupVideo()}
+          videoVolume={videoVolume}
+          videoZoom={videoZoom}
+          changeVolume={changeVolume}
+          changeZoom={changeZoom}
         />
-        <button type="button" onClick={() => this.connectVideo()}>start webrtc</button>
-        <button type="button" onClick={() => this.hangupVideo()}>stop webrtc</button>
-        <button type="button" onClick={() => this.startVideo("screen").then(() => {this.emitBroadcast({type: 'cast'})})}>share screen</button>
-        <button type="button" onClick={() => this.startVideo("selfy").then(() => {this.emitBroadcast({type: 'cast'})})}>selfy</button>
-        <video id="video" autoplay="1" className={classes.display}></video>
-        <div className={classes.board_message}>
-          {voices.map(voice => {
-            return <BoardMessage voice={voice} />;
-          })}
+        <div className={classes.live_content}>
+          <video style={{MozTransform:`scale(${videoZoom})`,WebkitTransform:`scale(${videoZoom})`,MsTransform:`scale(${videoZoom})`,Transform:`scale(${videoZoom})`}} id="video" autoplay="1" className={classes.display}></video>
+          {onVoice?
+            onSelfy || onScreen?
+              <VoiceList classes={classes} voices={voices} socket={this.socket} />
+              :
+              <VoiceChat classes={classes} voices={voices} socket={this.socket} />
+            :
+            null
+          }
         </div>
         <BoardForm
           classes={classes}
           channel={channel}
           name={name}
+          onVoice={onVoice}
           myvoice={myvoice}
           sendPress={emitVoice}
           socket={this.socket}
@@ -573,8 +626,14 @@ const mapStateToProps = state => ({
   members: state.members,
   myvoice: state.myvoice,
   voices: state.voices,
+  isOpenMemberList: state.isOpenMemberList,
   isOpenController: state.isOpenController,
-  isOpenMemberList: state.isOpenMemberList
+  onSelfy: state.onSelfy,
+  onScreen: state.onScreen,
+  onSpeaker: state.onSpeaker,
+  onVoice: state.onVoice,
+  videoVolume: state.videoVolume,
+  videoZoom: state.videoZoom
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -582,6 +641,9 @@ const mapDispatchToProps = dispatch => ({
   receiveLiveInfo: data => dispatch(receiveLiveInfo(data)),
   emitVoice: data => dispatch(emitVoice(data)),
   toggleController: () => dispatch(toggleController()),
+  toggleSettings: setting => dispatch(toggleSettings(setting)),
+  changeVolume: volume => dispatch(changeVolume(volume)),
+  changeZoom: scale => dispatch(changeZoom(scale)),
   clickMemberList: () => dispatch(clickMemberList()),
   clickAwayMemberList: () => dispatch(clickAwayMemberList()),
   receiveVoice: data => dispatch(receiveVoice(data)),

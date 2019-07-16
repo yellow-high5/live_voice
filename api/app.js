@@ -109,10 +109,11 @@ function startLive(live){
         emitter,
         position_x,
         position_y,
+        socket,
         timestamp,
       } = data
       console.log(data)
-      let new_voice = new Voice({content: content, emitter: emitter, position_x: position_x, position_y: position_y, timestamp: timestamp});
+      let new_voice = new Voice({content: content, emitter: emitter, position_x: position_x, position_y: position_y, socket: socket, timestamp: timestamp});
       new_voice.save((err, voice) => {
         if(!voice) {
           return next(err);

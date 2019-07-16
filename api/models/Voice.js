@@ -21,6 +21,10 @@ let VoiceSchema = new Schema(
       type: Number,
       required: [true, 'position_y required'],
     },
+    socket: {
+      type: String,
+      required: [true, 'socket required'],
+    },
     timestamp: {
       type: String,
       required: [true, 'timestamp required'],

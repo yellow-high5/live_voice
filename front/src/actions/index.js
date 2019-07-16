@@ -35,15 +35,30 @@ export const emitVoice = voice => ({
 
 export const toggleController = () => ({
   type: "TOGGLE_CONTROLLER"
+});
+
+export const toggleSettings = setting => ({
+  type: "TOGGLE_SETTINGS",
+  setting
+});
+
+export const changeVolume = volume => ({
+  type: "CHANGE_VOLUME",
+  volume
+});
+
+export const changeZoom = scale => ({
+  type: "CHANGE_ZOOM",
+  scale
 })
 
 export const clickMemberList = () => ({
   type: "CLICK_MEMBER_LIST"
-})
+});
 
 export const clickAwayMemberList = () => ({
   type: "CLICK_AWAY_MEMBER_LIST"
-})
+});
 
 const fetchLive = () => ({
   type: "FETCH_LIVE"
@@ -93,7 +108,7 @@ export const createLive = (name, title, history) => dispatch => {
     })
     .then(result => {
       dispatch(startLive(result.title, result.channel));
-      history.push("/board");
+      history.push(`/board/${result.channel}`);
       dispatch(successFetch(name));
     })
     .catch(err => {
@@ -112,7 +127,7 @@ export const findChannel = (name, channel, history) => dispatch => {
     })
     .then(result => {
       dispatch(subscribeChannel(result.title, result.channel, result.voices));
-      history.push("/board");
+      history.push(`/board/${result.channel}`);
       dispatch(successFetch(name));
     })
     .catch(err => {

@@ -11,7 +11,7 @@ import { Mic, LiveTv } from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
-import { BoardMemberList } from "./BoardMemberList";
+import { MemberList } from "./MemberList";
 
 import copy from 'copy-to-clipboard';
 
@@ -27,27 +27,18 @@ const inner_theme = createMuiTheme({
 });
 
 
-export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, clickMike, clickAway, open, members }) => {
+export const BoardTopbar = ({ classes, title, channel, clickLogo, clickMike, clickAway, open, members }) => {
   return (
     <MuiThemeProvider theme={inner_theme}>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar className={classes.topbar}>
-          {isPerformer ?
-            <Tooltip title="Live Settings" placement="bottom">
-              <ButtonBase onClick={() => {
-                clickLogo();
-              }}>
-                <img src={logo} alt="logo" className={classes.logo} />
-              </ButtonBase>
-            </Tooltip> :
-            <Tooltip title="Live Settings" placement="bottom">
-              <ButtonBase onClick={() => {
-                clickLogo();
-              }}>
-                <img src={logo} alt="logo" className={classes.logo} />
-              </ButtonBase>
-            </Tooltip>
-          }
+          <Tooltip title="Live Settings" placement="bottom">
+            <ButtonBase onClick={() => {
+              clickLogo();
+            }}>
+              <img src={logo} alt="logo" className={classes.logo} />
+            </ButtonBase>
+          </Tooltip>
           <ClickAwayListener onClickAway={clickAway}>
             <div className={classes.title}>
               <Tooltip title="Member List" placement="bottom">
@@ -58,7 +49,7 @@ export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, c
                 </IconButton>
               </Tooltip>
               {open ? (
-                <BoardMemberList classes={classes} members={members}/>
+                <MemberList classes={classes} members={members}/>
               ) : null}
               <Typography color="secondary" variant="h5">
                 {title}
@@ -80,8 +71,3 @@ export const BoardTopbar = ({ classes, title, channel, isPerformer, clickLogo, c
     </MuiThemeProvider>
   );
 };
-
-
-// <ButtonBase disabled>
-//   <img src={logo} alt="logo" className={classes.logo} />
-// </ButtonBase>

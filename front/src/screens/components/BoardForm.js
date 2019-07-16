@@ -40,6 +40,7 @@ export const BoardForm = ({
   classes,
   channel,
   name,
+  onVoice,
   myvoice,
   onChange,
   sendPress,
@@ -55,8 +56,9 @@ export const BoardForm = ({
                 channel: channel,
                 content: myvoice,
                 emitter: name,
-                position_x: Math.floor(500 * Math.random()) + 1,
-                position_y: Math.floor(500 * Math.random()) + 1,
+                position_x: Math.floor(100 * Math.random()) + 1,
+                position_y: Math.floor(100 * Math.random()) + 1,
+                socket: socket.id,
                 timestamp: moment().format("MM/DD HH:mm")
               }
               sendPress(data);
@@ -65,6 +67,7 @@ export const BoardForm = ({
           }}
         >
           <TextField
+            disabled={onVoice?false:true}
             type="text"
             margin="normal"
             variant="outlined"
@@ -78,8 +81,9 @@ export const BoardForm = ({
                         channel: channel,
                         content: myvoice,
                         emitter: name,
-                        position_x: Math.floor(500 * Math.random()) + 1,
-                        position_y: Math.floor(500 * Math.random()) + 1,
+                        position_x: Math.floor(100 * Math.random()) + 1,
+                        position_y: Math.floor(100 * Math.random()) + 1,
+                        socket: socket.id,
                         timestamp: moment().format("MM/DD HH:mm")
                       }
                       sendPress(data);
