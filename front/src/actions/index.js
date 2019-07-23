@@ -42,6 +42,16 @@ export const toggleSettings = setting => ({
   setting
 });
 
+export const toggleOnSettings = setting => ({
+  type: "TOGGLE_ON_SETTINGS",
+  setting
+});
+
+export const toggleOffSettings = setting => ({
+  type: "TOGGLE_OFF_SETTINGS",
+  setting
+});
+
 export const changeVolume = volume => ({
   type: "CHANGE_VOLUME",
   volume

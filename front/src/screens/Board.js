@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import { receiveLiveInfo, inputVoice, receiveVoice, emitVoice, toggleController, toggleSettings, changeVolume, changeZoom, clickMemberList, clickAwayMemberList, exitLive } from "../actions";
+import { receiveLiveInfo, inputVoice, receiveVoice, emitVoice, toggleController, toggleSettings, toggleOnSettings, toggleOffSettings, changeVolume, changeZoom, clickMemberList, clickAwayMemberList, exitLive } from "../actions";
 
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
@@ -12,6 +12,7 @@ import { BoardForm } from "./components/BoardForm";
 import VoiceList from "./components/VoiceList";
 import VoiceChat from "./components/VoiceChat";
 
+import DetectRTC from 'detectrtc';
 import io from "socket.io-client";
 import Swal from 'sweetalert2';
 
@@ -121,16 +122,23 @@ class Board extends React.Component {
   constructor(props) {
     super(props);
 
+    //https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DetectRTC
+    DetectRTC.load(() => {
+      console.log(DetectRTC.isScreenCapturingSupported);
+    });
+
     this.socket = io(`http://localhost:8080/${props.channel}?name=${props.name}`);
     this.peerConnections = [];
     this.remoteVideos = [];
     this.video = document.getElementById('video');
     this.localStream = null;
-    this.MAX_CONNECTION_COUNT = 3;
+
+    if(!this.props.isPerformer && !this.props.onSelfy){
+      this.connectVideo();
+    }
 
     //ライブ情報を受信
     this.socket.on('RECEIVE_LIVE_INFO', (data) => {
-      console.log(data);
       props.receiveLiveInfo(data);
     })
     //メッセージを受信・更新
@@ -138,7 +146,7 @@ class Board extends React.Component {
       props.receiveVoice(data);
     });
     //WebRTC
-    this.socket.on('signaling', (data) => {
+    this.socket.on('SIGNALING', (data) => {
       let from = data.from;
       switch(data.type) {
         case "cast":
@@ -151,17 +159,20 @@ class Board extends React.Component {
             }).then((result) => {
               if (result.value) {
                 this.connectVideo();
-                this.props.toggleSettings('selfy');
               }
             })
           }
           break;
         case "call":
-          this.makeOffer(from);
+          //callを受けた時にどちらかがONであれば
+          if(this.props.onSelfy || this.props.onScreen){
+            this.makeOffer(from);
+          }
           break;
         case "offer":
           let offer = new RTCSessionDescription(data);
           this.setOffer(from, offer);
+          this.props.toggleOnSettings('selfy');
           break;
         case "answer":
           let answer = new RTCSessionDescription(data);
@@ -169,7 +180,6 @@ class Board extends React.Component {
           break;
         case "candidate":
           let candidate = new RTCIceCandidate(data.ice);
-          console.log(candidate);
           this.addIceCandidate(from, candidate);
           break;
         case "end":
@@ -181,7 +191,7 @@ class Board extends React.Component {
             }).then((result) => {
               if (result.value) {
                 this.detachVideo();
-                this.props.toggleSettings('selfy');
+                this.props.toggleOffSettings('selfy');
               }
             })
           }
@@ -204,30 +214,22 @@ class Board extends React.Component {
       })
     });
 
-    //パフォーマーでないならビデオ接続スタート
-    if(!this.props.isPerformer){
-      this.connectVideo();
-    }
   }
 
   emitBroadcast(data) {
     console.log(data);
     console.log(this.socket);
-    this.socket.emit('signaling', data);
+    this.socket.emit('SIGNALING', data);
     if(data.type === "cast"){console.log("cast!!")}
   }
   emitTo(id, data) {
     data.to = id;
-    this.socket.emit('signaling', data);
+    this.socket.emit('SIGNALING', data);
   }
-
 
   // --- RTCPeerConnections ---
   getConnectionCount() {
     return this.peerConnections.length;
-  }
-  canConnectMore() {
-    return (this.getConnectionCount() < this.MAX_CONNECTION_COUNT);
   }
   isConnectedWith(id) {
     if (this.peerConnections[id])  {
@@ -450,6 +452,9 @@ class Board extends React.Component {
     let video = await document.getElementById('video');
     navigator.getUserMedia = await navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
     switch(type) {
+      /***
+        DetectRTCを用いてブラウザごとの挙動を変更する必要あり
+      ***/
       case "selfy":
         navigator.getUserMedia({video: true, audio: true},
           (stream) => {
@@ -462,15 +467,9 @@ class Board extends React.Component {
         );
         break;
       case "screen":
-        navigator.getUserMedia({video: {mediaSource: "screen"}},
-          (stream) => {
-            this.localStream = stream;
-            video.srcObject = stream;
-          },
-          (err) => {
-            console.log(err);
-          }
-        );
+        let stream = await navigator.mediaDevices.getDisplayMedia( { video: { displaySurface: "window" } } );
+        this.localStream = stream;
+        video.srcObject = stream;
         break;
       default:
         break;
@@ -489,12 +488,7 @@ class Board extends React.Component {
     this.localStream = null;
   }
   connectVideo() {
-    if (! this.canConnectMore()) {
-      console.log('TOO MANY connections');
-    }
-    else {
-      this.emitBroadcast({type: 'call'});
-    }
+    this.emitBroadcast({type: 'call'});
   }
   hangupVideo() {
     console.log(this.peerConnections);
@@ -506,27 +500,7 @@ class Board extends React.Component {
   }
 
   componentWillUnmount() {
-    // if(this.props.isPerformer){
-    //   Swal.fire({
-    //     text: '本当にこのライブを終了しますか？',
-    //     type: 'warning',
-    //     showCancelButton: true,
-    //     confirmButtonColor: '#3085d6',
-    //     cancelButtonColor: '#d33',
-    //     confirmButtonText: 'Yes'
-    //   }).then((result) => {
-    //     if (result.value) {
-    //       this.socket.emit('CLOSE_LIVE', this.props.channel);
-    //       this.socket.close();
-    //       this.props.exitLive();
-    //       this.props.history.push('/');
-    //     }
-    //     else {
-    //       this.props.history.push('/board');
-    //     }
-    //   })
-    // }
-    if(this.props.onSelfy || this.props.onScreen){
+    if(this.props.isPerformer && (this.props.onSelfy || this.props.onScreen)){
       this.hangupVideo()
     }
     this.socket.close();
@@ -642,6 +616,8 @@ const mapDispatchToProps = dispatch => ({
   emitVoice: data => dispatch(emitVoice(data)),
   toggleController: () => dispatch(toggleController()),
   toggleSettings: setting => dispatch(toggleSettings(setting)),
+  toggleOnSettings: setting => dispatch(toggleOnSettings(setting)),
+  toggleOffSettings: setting => dispatch(toggleOffSettings(setting)),
   changeVolume: volume => dispatch(changeVolume(volume)),
   changeZoom: scale => dispatch(changeZoom(scale)),
   clickMemberList: () => dispatch(clickMemberList()),

@@ -44,12 +44,12 @@ var Member = require('./models/Member')
 var Voice = require('./models/Voice')
 
 //ライブ・チャンネル開設
-app.post('/new_channel', function(req, res, next) {
-  let title = req.query.title
-  let name = req.query.name
+app.post('/new_channel', async function(req, res, next) {
+  let title = await req.query.title
+  let name = await req.query.name
   //ランダムなチャンネルでライブを作成する
-  let random_name = `${faker.random.word(1).toLowerCase()}_${faker.random.number()}`
-  let new_live = new Live({channel: random_name, title: title})
+  let random_name = await `${faker.random.word(1).toLowerCase()}_${faker.random.number()}`
+  let new_live = await new Live({channel: random_name, title: title})
   new_live.save((err, live) => {
     if(err) {
       return next(err);
@@ -60,9 +60,9 @@ app.post('/new_channel', function(req, res, next) {
 });
 
 //チャンネルへのアクセス
-app.get('/check_channel', function(req, res, next) {
-  let channel = req.query.channel
-  let name = req.query.name
+app.get('/check_channel', async function(req, res, next) {
+  let channel = await req.query.channel
+  let name = await req.query.name
   //チャンネルを検索
   Live.findOne({channel: channel}).populate('voices').exec((err, live) => {
     if(!live) {
@@ -76,8 +76,8 @@ app.get('/check_channel', function(req, res, next) {
 
 
 //ライブごとに名前空間で分割する
-function startLive(live){
-  let nsp = io.of(`/${live.channel}`);
+async function startLive(live){
+  let nsp = await io.of(`/${live.channel}`);
   //ライブに接続があったとき
   nsp.on('connection',
   (socket) => {
@@ -132,15 +132,15 @@ function startLive(live){
     });
 
     //クライアントからのシグナリングを受信したとき
-    socket.on('signaling', function (data) {
+    socket.on('SIGNALING', function (data) {
       data.from = socket.id;
       let target = data.to
       console.log(data)
       if (target) {
-        nsp.to(target).emit('signaling', data);
+        nsp.to(target).emit('SIGNALING', data);
         return;
       }
-      nsp.emit('signaling', data);
+      nsp.emit('SIGNALING', data);
     });
 
     //ライブへの接続が切れたクライアントがいたとき

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Home from "./screens/Home";
 import Performer from "./screens/Performer";
 import Listener from "./screens/Listener";
@@ -21,13 +21,13 @@ class App extends Component {
       <MuiThemeProvider theme={theme}>
         <div>
           <BrowserRouter>
-            <div>
+            <Switch>
               <Route exact path="/" component={Home} />
               <Route path="/performer" component={Performer} />
               <Route path="/listener" component={Listener} />
               <Route path="/board/:channel" component={Board} />
               <Route component={NoMatch} />
-            </div>
+            </Switch>
           </BrowserRouter>
         </div>
       </MuiThemeProvider>

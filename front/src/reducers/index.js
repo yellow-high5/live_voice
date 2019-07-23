@@ -175,6 +175,10 @@ const onSelfy = (state = false, action) => {
         return false;
       }
       return state
+    case "TOGGLE_ON_SETTINGS":
+      return true
+    case "TOGGLE_OFF_SETTINGS":
+      return false
     case "EXIT_LIVE":
       return false;
     default:
