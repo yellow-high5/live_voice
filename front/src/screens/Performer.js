@@ -51,11 +51,11 @@ const inner_theme = createMuiTheme({
     MuiButtonBase: {
       root: {
         background: "linear-gradient(45deg, #00FF02 0%, #008002 100%)",
-        '&$disabled': {
+        "&$disabled": {
           background: "rgba(255,255,255,0.8)!important",
-          border: "3px solid #FFFFFF!important",
-        },
-      },
+          border: "3px solid #FFFFFF!important"
+        }
+      }
     }
   }
 });
@@ -139,7 +139,7 @@ const Performer = ({
       <FormControl
         className={classes.formControl}
         onKeyDown={e => {
-          if (e.keyCode === 13 && title!=="") {
+          if (e.keyCode === 13 && title !== "") {
             startLive(name, title, history);
           }
         }}
@@ -180,7 +180,7 @@ const Performer = ({
           variant="contained"
           className={classes.start_button}
           onClick={() => startLive(name, title, history)}
-          disabled={title===""?true:false}
+          disabled={title === "" ? true : false}
         >
           <Mic className={classes.icon} /> Start Your Live
         </IconButton>

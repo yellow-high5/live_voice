@@ -1,7 +1,21 @@
 import React from "react";
 import { connect } from "react-redux";
 
-import { receiveLiveInfo, inputVoice, receiveVoice, emitVoice, toggleController, toggleSettings, toggleOnSettings, toggleOffSettings, changeVolume, changeZoom, clickMemberList, clickAwayMemberList, exitLive } from "../actions";
+import {
+  receiveLiveInfo,
+  inputVoice,
+  receiveVoice,
+  emitVoice,
+  toggleController,
+  toggleSettings,
+  toggleOnSettings,
+  toggleOffSettings,
+  changeVolume,
+  changeZoom,
+  clickMemberList,
+  clickAwayMemberList,
+  exitLive
+} from "../actions";
 
 import { withRouter } from "react-router";
 import { withStyles } from "@material-ui/core/styles";
@@ -12,9 +26,9 @@ import { BoardForm } from "./components/BoardForm";
 import VoiceList from "./components/VoiceList";
 import VoiceChat from "./components/VoiceChat";
 
-import DetectRTC from 'detectrtc';
+import DetectRTC from "detectrtc";
 import io from "socket.io-client";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 const styles = theme => ({
   container: {
@@ -66,23 +80,23 @@ const styles = theme => ({
     width: 160,
     padding: 5,
     overflow: "auto",
-    zIndex: 999,
+    zIndex: 999
   },
   members_paper_item: {
-    padding: 3,
+    padding: 3
   },
   members_paper_typo: {
-    marginLeft: 5,
+    marginLeft: 5
   },
   live_content: {
     position: "fixed",
     top: 64,
     width: "100vw",
-    height: "calc(100vh - 144px)",
+    height: "calc(100vh - 144px)"
   },
   display: {
     position: "absolute",
-    width: "100vw",
+    width: "100vw"
   },
   voices_list_paper: {
     backgroundColor: "rgba(16,17,20, 0.5)",
@@ -90,7 +104,7 @@ const styles = theme => ({
     width: "25vw",
     height: "calc(100vh - 144px)",
     overflow: "auto",
-    direction: "rtl",
+    direction: "rtl"
   },
   voices_chat_paper: {
     backgroundColor: "rgba(16,17,20, 0.5)",
@@ -98,13 +112,13 @@ const styles = theme => ({
     height: "calc(100vh - 144px)",
     overflow: "auto",
     direction: "rtl",
-    margin: "auto",
+    margin: "auto"
   },
   drawer: {
     backgroundColor: "#282c34",
     position: "absolute",
     top: "64px",
-    height: "calc(100vh - 144px)",
+    height: "calc(100vh - 144px)"
   },
   board_control_menu: {
     width: "300px",
@@ -114,8 +128,8 @@ const styles = theme => ({
   },
   board_control_subheader: {
     color: "#FFFFFF",
-    borderBottom: "1px solid #FFFFFF",
-  },
+    borderBottom: "1px solid #FFFFFF"
+  }
 });
 
 class Board extends React.Component {
@@ -127,52 +141,54 @@ class Board extends React.Component {
       console.log(DetectRTC.isScreenCapturingSupported);
     });
 
-    this.socket = io(`http://localhost:8080/${props.channel}?name=${props.name}`);
+    this.socket = io(
+      `http://localhost:8080/${props.channel}?name=${props.name}`
+    );
     this.peerConnections = [];
     this.remoteVideos = [];
-    this.video = document.getElementById('video');
+    this.video = document.getElementById("video");
     this.localStream = null;
 
-    if(!this.props.isPerformer && !this.props.onSelfy){
+    if (!this.props.isPerformer && !this.props.onSelfy) {
       this.connectVideo();
     }
 
     //ライブ情報を受信
-    this.socket.on('RECEIVE_LIVE_INFO', (data) => {
+    this.socket.on("RECEIVE_LIVE_INFO", data => {
       props.receiveLiveInfo(data);
-    })
+    });
     //メッセージを受信・更新
-    this.socket.on('RECEIVE_VOICE', (data) => {
+    this.socket.on("RECEIVE_VOICE", data => {
       props.receiveVoice(data);
     });
     //WebRTC
-    this.socket.on('SIGNALING', (data) => {
+    this.socket.on("SIGNALING", data => {
       let from = data.from;
-      switch(data.type) {
+      switch (data.type) {
         case "cast":
-          if(!this.props.isPerformer){
+          if (!this.props.isPerformer) {
             Swal.fire({
-              text: '新たにビデオライブが配信されました。',
-              type: 'warning',
-              cancelButtonColor: '#FBB03B',
-              confirmButtonText: 'Watch!'
-            }).then((result) => {
+              text: "新たにビデオライブが配信されました。",
+              type: "warning",
+              cancelButtonColor: "#FBB03B",
+              confirmButtonText: "Watch!"
+            }).then(result => {
               if (result.value) {
                 this.connectVideo();
               }
-            })
+            });
           }
           break;
         case "call":
           //callを受けた時にどちらかがONであれば
-          if(this.props.onSelfy || this.props.onScreen){
+          if (this.props.onSelfy || this.props.onScreen) {
             this.makeOffer(from);
           }
           break;
         case "offer":
           let offer = new RTCSessionDescription(data);
           this.setOffer(from, offer);
-          this.props.toggleOnSettings('selfy');
+          this.props.toggleOnSettings("selfy");
           break;
         case "answer":
           let answer = new RTCSessionDescription(data);
@@ -183,17 +199,17 @@ class Board extends React.Component {
           this.addIceCandidate(from, candidate);
           break;
         case "end":
-          if(!this.props.isPerformer){
+          if (!this.props.isPerformer) {
             Swal.fire({
-              text: 'ビデオ配信が終了しました。',
-              type: 'alert',
-              confirmButtonText: 'Yes'
-            }).then((result) => {
+              text: "ビデオ配信が終了しました。",
+              type: "alert",
+              confirmButtonText: "Yes"
+            }).then(result => {
               if (result.value) {
                 this.detachVideo();
-                this.props.toggleOffSettings('selfy');
+                this.props.toggleOffSettings("selfy");
               }
-            })
+            });
           }
           break;
         default:
@@ -201,30 +217,31 @@ class Board extends React.Component {
       }
     });
     //チャンネルの終了を受信
-    this.socket.on('CLOSE_LIVE', () => {
+    this.socket.on("CLOSE_LIVE", () => {
       Swal.fire({
-        text: 'チャンネルは終了しました！',
-        type: 'success',
-        confirmButtonColor: '#3085d6',
-        confirmButtonText: 'OK'
-      }).then((result) => {
+        text: "チャンネルは終了しました！",
+        type: "success",
+        confirmButtonColor: "#3085d6",
+        confirmButtonText: "OK"
+      }).then(result => {
         if (result.value) {
-          props.history.push('/');
+          props.history.push("/");
         }
-      })
+      });
     });
-
   }
 
   emitBroadcast(data) {
     console.log(data);
     console.log(this.socket);
-    this.socket.emit('SIGNALING', data);
-    if(data.type === "cast"){console.log("cast!!")}
+    this.socket.emit("SIGNALING", data);
+    if (data.type === "cast") {
+      console.log("cast!!");
+    }
   }
   emitTo(id, data) {
     data.to = id;
-    this.socket.emit('SIGNALING', data);
+    this.socket.emit("SIGNALING", data);
   }
 
   // --- RTCPeerConnections ---
@@ -232,10 +249,9 @@ class Board extends React.Component {
     return this.peerConnections.length;
   }
   isConnectedWith(id) {
-    if (this.peerConnections[id])  {
+    if (this.peerConnections[id]) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -260,90 +276,87 @@ class Board extends React.Component {
   }
 
   sendSdp(id, sessionDescription) {
-    console.log('---sending sdp ---');
+    console.log("---sending sdp ---");
     let data = { type: sessionDescription.type, sdp: sessionDescription.sdp };
-    console.log('sending SDP=' + data);
+    console.log("sending SDP=" + data);
     this.emitTo(id, data);
   }
   sendIceCandidate(id, candidate) {
-    console.log('---sending ICE candidate ---');
-    let obj = { type: 'candidate', ice: candidate };
+    console.log("---sending ICE candidate ---");
+    let obj = { type: "candidate", ice: candidate };
     if (this.isConnectedWith(id)) {
       this.emitTo(id, obj);
-    }
-    else {
-      console.warn('connection NOT EXIST or ALREADY CLOSED. so skip candidate')
+    } else {
+      console.warn("connection NOT EXIST or ALREADY CLOSED. so skip candidate");
     }
   }
   prepareNewConnection(id) {
-    let peer = new RTCPeerConnection({"iceServers": []});
+    let peer = new RTCPeerConnection({ iceServers: [] });
 
     // --- on get remote stream ---
-    peer.ontrack = (event) => {
+    peer.ontrack = event => {
       let stream = event.streams[0];
-      console.log('-- peer.ontrack() stream.id=' + stream.id);
+      console.log("-- peer.ontrack() stream.id=" + stream.id);
       this.attachVideo(id, stream);
     };
 
     // --- on get local ICE candidate
-    peer.onicecandidate = (evt) => {
+    peer.onicecandidate = evt => {
       if (evt.candidate) {
         console.log(evt.candidate);
         this.sendIceCandidate(id, evt.candidate);
       } else {
-        console.log('empty ice event');
+        console.log("empty ice event");
         console.log(this.peerConnections);
       }
     };
 
     // --- when need to exchange SDP ---
-    peer.onnegotiationneeded = (evt) => {
-      console.log('-- onnegotiationneeded() ---');
+    peer.onnegotiationneeded = evt => {
+      console.log("-- onnegotiationneeded() ---");
     };
 
     // --- other events ----
-    peer.onicecandidateerror = (evt) => {
-      console.error('ICE candidate ERROR:', evt);
+    peer.onicecandidateerror = evt => {
+      console.error("ICE candidate ERROR:", evt);
     };
 
     peer.onsignalingstatechange = () => {
-      console.log('== signaling status=' + peer.signalingState);
+      console.log("== signaling status=" + peer.signalingState);
     };
 
     peer.oniceconnectionstatechange = () => {
-      console.log('== ice connection status=' + peer.iceConnectionState);
-      if (peer.iceConnectionState === 'disconnected') {
-        console.log('-- disconnected --');
+      console.log("== ice connection status=" + peer.iceConnectionState);
+      if (peer.iceConnectionState === "disconnected") {
+        console.log("-- disconnected --");
         //hangupVideo();
         //???this.stopConnection(id);
       }
     };
 
     peer.onicegatheringstatechange = () => {
-      console.log('==***== ice gathering state=' + peer.iceGatheringState);
+      console.log("==***== ice gathering state=" + peer.iceGatheringState);
     };
 
     peer.onconnectionstatechange = () => {
-      console.log('==***== connection state=' + peer.connectionState);
+      console.log("==***== connection state=" + peer.connectionState);
     };
 
-    peer.onremovestream = (event) => {
-      console.log('-- peer.onremovestream()');
+    peer.onremovestream = event => {
+      console.log("-- peer.onremovestream()");
       this.detachVideo();
     };
 
-
     // -- add local stream --
     if (this.localStream) {
-      console.log('Adding local stream...');
+      console.log("Adding local stream...");
       let stream = this.localStream;
-      stream.getTracks().forEach((track) => {
+      stream.getTracks().forEach(track => {
         peer.addTrack(track, stream);
-        console.log(track)
+        console.log(track);
       });
-    }
-    else {
-      console.warn('no local stream, but continue.');
+    } else {
+      console.warn("no local stream, but continue.");
     }
 
     return peer;
@@ -351,123 +364,141 @@ class Board extends React.Component {
   makeOffer(id) {
     let peerConnection = this.prepareNewConnection(id);
     this.addConnection(id, peerConnection);
-    peerConnection.createOffer()
-    .then((sessionDescription) => {
-      console.log('createOffer() succsess in promise');
-      return peerConnection.setLocalDescription(sessionDescription);
-    }).then(() =>  {
-      console.log('setLocalDescription() succsess in promise');
-      this.sendSdp(id, peerConnection.localDescription);
-    }).catch((err) => {
-      console.error(err);
-    });
+    peerConnection
+      .createOffer()
+      .then(sessionDescription => {
+        console.log("createOffer() succsess in promise");
+        return peerConnection.setLocalDescription(sessionDescription);
+      })
+      .then(() => {
+        console.log("setLocalDescription() succsess in promise");
+        this.sendSdp(id, peerConnection.localDescription);
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
   setOffer(id, sessionDescription) {
     let peerConnection = this.prepareNewConnection(id);
     this.addConnection(id, peerConnection);
 
-    peerConnection.setRemoteDescription(sessionDescription)
-    .then(() => {
-      console.log('setRemoteDescription(offer) succsess in promise');
-      this.makeAnswer(id);
-    }).catch((err) => {
-      console.error('setRemoteDescription(offer) ERROR: ', err);
-    });
+    peerConnection
+      .setRemoteDescription(sessionDescription)
+      .then(() => {
+        console.log("setRemoteDescription(offer) succsess in promise");
+        this.makeAnswer(id);
+      })
+      .catch(err => {
+        console.error("setRemoteDescription(offer) ERROR: ", err);
+      });
   }
   makeAnswer(id) {
-    console.log('sending Answer. Creating remote session description...' );
+    console.log("sending Answer. Creating remote session description...");
     let peerConnection = this.getConnection(id);
-    if (! peerConnection) {
-      console.error('peerConnection NOT exist!');
+    if (!peerConnection) {
+      console.error("peerConnection NOT exist!");
       return;
     }
 
-    peerConnection.createAnswer()
-    .then((sessionDescription) => {
-      console.log('createAnswer() succsess in promise');
-      return peerConnection.setLocalDescription(sessionDescription);
-    }).then(() => {
-      console.log('setLocalDescription() succsess in promise');
+    peerConnection
+      .createAnswer()
+      .then(sessionDescription => {
+        console.log("createAnswer() succsess in promise");
+        return peerConnection.setLocalDescription(sessionDescription);
+      })
+      .then(() => {
+        console.log("setLocalDescription() succsess in promise");
 
-      // -- Trickle ICE の場合は、初期SDPを相手に送る --
-      this.sendSdp(id, peerConnection.localDescription);
+        // -- Trickle ICE の場合は、初期SDPを相手に送る --
+        this.sendSdp(id, peerConnection.localDescription);
 
-      // -- Vanilla ICE の場合には、まだSDPは送らない --
-    }).catch((err) => {
-      console.error(err);
-    });
+        // -- Vanilla ICE の場合には、まだSDPは送らない --
+      })
+      .catch(err => {
+        console.error(err);
+      });
   }
   setAnswer(id, sessionDescription) {
     let peerConnection = this.getConnection(id);
-    if (! peerConnection) {
-      console.error('peerConnection NOT exist!');
+    if (!peerConnection) {
+      console.error("peerConnection NOT exist!");
       return;
     }
 
-    peerConnection.setRemoteDescription(sessionDescription)
-    .then(() => {
-      console.log('setRemoteDescription(answer) succsess in promise');
-    }).catch((err) => {
-      console.error('setRemoteDescription(answer) ERROR: ', err);
-    });
+    peerConnection
+      .setRemoteDescription(sessionDescription)
+      .then(() => {
+        console.log("setRemoteDescription(answer) succsess in promise");
+      })
+      .catch(err => {
+        console.error("setRemoteDescription(answer) ERROR: ", err);
+      });
   }
   addIceCandidate(id, candidate) {
-    if (! this.isConnectedWith(id)) {
-      console.warn('NOT CONNEDTED or ALREADY CLOSED with id=' + id + ', so ignore candidate');
+    if (!this.isConnectedWith(id)) {
+      console.warn(
+        "NOT CONNEDTED or ALREADY CLOSED with id=" +
+          id +
+          ", so ignore candidate"
+      );
       return;
     }
 
     let peerConnection = this.getConnection(id);
     if (peerConnection) {
       peerConnection.addIceCandidate(candidate);
-    }
-    else {
-      console.error('PeerConnection not exist!');
+    } else {
+      console.error("PeerConnection not exist!");
       return;
     }
   }
 
   // --- video operation ---
   attachVideo(id, stream) {
-    console.log('attached!');
-    let video = document.getElementById('video');
+    console.log("attached!");
+    let video = document.getElementById("video");
     video.srcObject = stream;
     video.volume = 0.5;
   }
   detachVideo() {
-    console.log('detached!');
-    let video = document.getElementById('video');
+    console.log("detached!");
+    let video = document.getElementById("video");
     video.pause();
-    if('srcObject' in video) {
+    if ("srcObject" in video) {
       video.srcObject = null;
-    }
-    else {
-      if(video.src && (video.src !== '')) {
+    } else {
+      if (video.src && video.src !== "") {
         window.URL.revokeObjectURL(video.src);
       }
-      video.src = '';
+      video.src = "";
     }
   }
   async startVideo(type) {
-    let video = await document.getElementById('video');
-    navigator.getUserMedia = await navigator.getUserMedia || navigator.webkitGetUserMedia || window.navigator.mozGetUserMedia;
-    switch(type) {
+    let video = await document.getElementById("video");
+    navigator.getUserMedia =
+      (await navigator.getUserMedia) ||
+      navigator.webkitGetUserMedia ||
+      window.navigator.mozGetUserMedia;
+    switch (type) {
       /***
         DetectRTCを用いてブラウザごとの挙動を変更する必要あり
       ***/
       case "selfy":
-        navigator.getUserMedia({video: true, audio: true},
-          (stream) => {
+        navigator.getUserMedia(
+          { video: true, audio: true },
+          stream => {
             this.localStream = stream;
             video.srcObject = stream;
           },
-          (err) => {
+          err => {
             console.log(err);
           }
         );
         break;
       case "screen":
-        let stream = await navigator.mediaDevices.getDisplayMedia( { video: { displaySurface: "window" } } );
+        let stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { displaySurface: "window" }
+        });
         this.localStream = stream;
         video.srcObject = stream;
         break;
@@ -477,8 +508,8 @@ class Board extends React.Component {
   }
   async stopVideo() {
     let tracks = this.localStream.getTracks();
-    if (! tracks) {
-      console.warn('NO tracks');
+    if (!tracks) {
+      console.warn("NO tracks");
       return;
     }
 
@@ -488,24 +519,24 @@ class Board extends React.Component {
     this.localStream = null;
   }
   connectVideo() {
-    this.emitBroadcast({type: 'call'});
+    this.emitBroadcast({ type: "call" });
   }
   hangupVideo() {
     console.log(this.peerConnections);
     for (let id in this.peerConnections) {
       this.stopConnection(id);
     }
-    this.emitBroadcast({type: 'end'});
+    this.emitBroadcast({ type: "end" });
     this.stopVideo();
   }
 
   componentWillUnmount() {
-    if(this.props.isPerformer && (this.props.onSelfy || this.props.onScreen)){
-      this.hangupVideo()
+    if (this.props.isPerformer && (this.props.onSelfy || this.props.onScreen)) {
+      this.hangupVideo();
     }
     this.socket.close();
     this.props.exitLive();
-    this.props.history.push('/');
+    this.props.history.push("/");
   }
 
   render() {
@@ -533,7 +564,7 @@ class Board extends React.Component {
       changeVolume,
       changeZoom,
       clickMemberList,
-      clickAwayMemberList,
+      clickAwayMemberList
     } = this.props;
 
     return (
@@ -558,8 +589,16 @@ class Board extends React.Component {
           onScreen={onScreen}
           onSpeaker={onSpeaker}
           onVoice={onVoice}
-          startSelfy={() => this.startVideo("selfy").then(() => {this.emitBroadcast({type: 'cast'})})}
-          startScreen={() => this.startVideo("screen").then(() => {this.emitBroadcast({type: 'cast'})})}
+          startSelfy={() =>
+            this.startVideo("selfy").then(() => {
+              this.emitBroadcast({ type: "cast" });
+            })
+          }
+          startScreen={() =>
+            this.startVideo("screen").then(() => {
+              this.emitBroadcast({ type: "cast" });
+            })
+          }
           stopVideo={() => this.hangupVideo()}
           videoVolume={videoVolume}
           videoZoom={videoZoom}
@@ -567,15 +606,32 @@ class Board extends React.Component {
           changeZoom={changeZoom}
         />
         <div className={classes.live_content}>
-          <video style={{MozTransform:`scale(${videoZoom})`,WebkitTransform:`scale(${videoZoom})`,MsTransform:`scale(${videoZoom})`,Transform:`scale(${videoZoom})`}} id="video" autoplay="1" className={classes.display}></video>
-          {onVoice?
-            onSelfy || onScreen?
-              <VoiceList classes={classes} voices={voices} socket={this.socket} />
-              :
-              <VoiceChat classes={classes} voices={voices} socket={this.socket} />
-            :
-            null
-          }
+          <video
+            style={{
+              MozTransform: `scale(${videoZoom})`,
+              WebkitTransform: `scale(${videoZoom})`,
+              MsTransform: `scale(${videoZoom})`,
+              Transform: `scale(${videoZoom})`
+            }}
+            id="video"
+            autoplay="1"
+            className={classes.display}
+          />
+          {onVoice ? (
+            onSelfy || onScreen ? (
+              <VoiceList
+                classes={classes}
+                voices={voices}
+                socket={this.socket}
+              />
+            ) : (
+              <VoiceChat
+                classes={classes}
+                voices={voices}
+                socket={this.socket}
+              />
+            )
+          ) : null}
         </div>
         <BoardForm
           classes={classes}

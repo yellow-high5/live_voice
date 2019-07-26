@@ -35,8 +35,8 @@ const name = (state = "", action) => {
     case "INPUT_NAME":
       return action.text;
     case "SUCCESS_FETCH":
-      if(action.name === ""){
-        return "Anonymous🤡"
+      if (action.name === "") {
+        return "Anonymous🤡";
       }
       return action.name;
     case "EXIT_LIVE":
@@ -96,23 +96,23 @@ const isPerformer = (state = false, action) => {
     default:
       return state;
   }
-}
+};
 
 const voices = (state = [], action) => {
   switch (action.type) {
     case "SUBSCRIBE_CHANNEL":
-      return action.voices
+      return action.voices;
     case "RECEIVE_VOICE":
       let new_state = state;
       if (action.voice.content !== "") {
         new_state = [action.voice].concat(state);
       }
       return new_state;
-      // let new_state = state;
-      // if (action.voice.content !== "") {
-      //   new_state.splice(0, 0, action.voice);
-      // }
-      // return new_state;
+    // let new_state = state;
+    // if (action.voice.content !== "") {
+    //   new_state.splice(0, 0, action.voice);
+    // }
+    // return new_state;
     case "EXIT_LIVE":
       return [];
     default:
@@ -123,7 +123,7 @@ const voices = (state = [], action) => {
 const members = (state = [], action) => {
   switch (action.type) {
     case "RECEIVE_LIVE_INFO":
-      return action.data
+      return action.data;
     default:
       return state;
   }
@@ -151,48 +151,46 @@ const isOpenMemberList = (state = false, action) => {
     default:
       return state;
   }
-}
+};
 
 const isOpenController = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE_CONTROLLER":
-      if(state === true){
+      if (state === true) {
         return false;
       }
       return true;
     default:
       return state;
   }
-}
+};
 
 const onSelfy = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE_SETTINGS":
-      if(action.setting === 'selfy'){
+      if (action.setting === "selfy") {
         return !state;
-      }
-      else if(action.setting === 'screen'){
+      } else if (action.setting === "screen") {
         return false;
       }
-      return state
+      return state;
     case "TOGGLE_ON_SETTINGS":
-      return true
+      return true;
     case "TOGGLE_OFF_SETTINGS":
-      return false
+      return false;
     case "EXIT_LIVE":
       return false;
     default:
       return state;
   }
-}
+};
 
 const onScreen = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE_SETTINGS":
-      if(action.setting === 'screen'){
+      if (action.setting === "screen") {
         return !state;
-      }
-      else if(action.setting === 'selfy'){
+      } else if (action.setting === "selfy") {
         return false;
       }
       return state;
@@ -201,12 +199,12 @@ const onScreen = (state = false, action) => {
     default:
       return state;
   }
-}
+};
 
 const onSpeaker = (state = false, action) => {
   switch (action.type) {
     case "TOGGLE_SETTINGS":
-      if(action.setting === 'speaker'){
+      if (action.setting === "speaker") {
         return !state;
       }
       return state;
@@ -215,12 +213,12 @@ const onSpeaker = (state = false, action) => {
     default:
       return state;
   }
-}
+};
 
 const onVoice = (state = true, action) => {
   switch (action.type) {
     case "TOGGLE_SETTINGS":
-      if(action.setting === 'voice'){
+      if (action.setting === "voice") {
         return !state;
       }
       return state;
@@ -229,10 +227,10 @@ const onVoice = (state = true, action) => {
     default:
       return state;
   }
-}
+};
 
 const videoVolume = (state = 0.5, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "CHANGE_VOLUME":
       return action.volume;
     case "EXIT_LIVE":
@@ -240,10 +238,10 @@ const videoVolume = (state = 0.5, action) => {
     default:
       return state;
   }
-}
+};
 
 const videoZoom = (state = 1.0, action) => {
-  switch(action.type) {
+  switch (action.type) {
     case "CHANGE_ZOOM":
       return action.scale;
     case "EXIT_LIVE":
@@ -251,8 +249,7 @@ const videoZoom = (state = 1.0, action) => {
     default:
       return state;
   }
-}
-
+};
 
 export default combineReducers({
   title,
@@ -272,5 +269,5 @@ export default combineReducers({
   onSpeaker,
   onVoice,
   videoVolume,
-  videoZoom,
+  videoZoom
 });

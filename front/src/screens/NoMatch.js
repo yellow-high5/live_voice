@@ -35,7 +35,7 @@ const styles = theme => ({
     height: 48,
     padding: "0 30px",
     margin: "40px 20px"
-  },
+  }
 });
 
 const NoMatch = ({ classes, history }) => (

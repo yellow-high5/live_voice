@@ -16,7 +16,7 @@ export const inputName = text => ({
 export const receiveLiveInfo = data => ({
   type: "RECEIVE_LIVE_INFO",
   data
-})
+});
 
 export const inputVoice = text => ({
   type: "INPUT_VOICE",
@@ -60,7 +60,7 @@ export const changeVolume = volume => ({
 export const changeZoom = scale => ({
   type: "CHANGE_ZOOM",
   scale
-})
+});
 
 export const clickMemberList = () => ({
   type: "CLICK_MEMBER_LIST"
@@ -78,7 +78,7 @@ const fetchChannel = () => ({
   type: "FETCH_CHANNEL"
 });
 
-const successFetch = (name) => ({
+const successFetch = name => ({
   type: "SUCCESS_FETCH",
   name
 });
@@ -103,7 +103,6 @@ const subscribeChannel = (title, channel, voices) => ({
 export const exitLive = () => ({
   type: "EXIT_LIVE"
 });
-
 
 //非同期アクション
 const API_PATH = "http://localhost:9000";

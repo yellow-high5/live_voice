@@ -51,11 +51,11 @@ const inner_theme = createMuiTheme({
     MuiButtonBase: {
       root: {
         background: "linear-gradient(45deg, #FCEE21 0%, #FBB03B 100%)",
-        '&$disabled': {
+        "&$disabled": {
           background: "rgba(255,255,255,0.8)!important",
-          border: "3px solid #FFFFFF!important",
-        },
-      },
+          border: "3px solid #FFFFFF!important"
+        }
+      }
     }
   }
 });
@@ -140,7 +140,7 @@ const Listener = ({
       <FormControl
         className={classes.formControl}
         onKeyDown={e => {
-          if (e.keyCode === 13 && channel!=="") {
+          if (e.keyCode === 13 && channel !== "") {
             subscribeChannel(name, channel, history);
           }
         }}
@@ -181,7 +181,7 @@ const Listener = ({
           variant="contained"
           className={classes.subscribe_button}
           onClick={() => subscribeChannel(name, channel, history)}
-          disabled={channel===""?true:false}
+          disabled={channel === "" ? true : false}
         >
           <LiveTv className={classes.icon} /> Subscribe
         </IconButton>
